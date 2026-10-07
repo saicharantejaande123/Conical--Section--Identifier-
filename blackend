@@ -1,0 +1,139 @@
+# ============================================
+# CELL 19: AUTOMATED TESTING
+# ============================================
+
+def run_single_test(test_name, config, expected_type):
+    """
+    Run one conic through the mathematical engine
+    and compare the detected result with the expected result.
+    """
+
+    # Build mathematical model
+    a, h, b, g, f, c, Q, d, C = build_model(config)
+
+    # Eigenvalue analysis
+    eigenvalues, P = eigen_analysis(Q)
+
+    # Classification
+    result = classify_conic(
+        a, h, b, g, f, c,
+        Q, d, C,
+        eigenvalues,
+        P
+    )
+
+    detected_type = result.classification
+
+    # Check result
+    passed = (
+        detected_type.lower()
+        == expected_type.lower()
+    )
+
+    return {
+        "Test": test_name,
+        "Expected": expected_type,
+        "Detected": detected_type,
+        "Status": "PASS" if passed else "FAIL",
+        "Eigenvalue 1": round(
+            eigenvalues[0], 4
+        ),
+        "Eigenvalue 2": round(
+            eigenvalues[1], 4
+        ),
+        "Rotation": round(
+            result.rotation_angle, 2
+        )
+    }
+
+
+# ------------------------------------------------
+# Benchmark cases
+# ------------------------------------------------
+
+TEST_CASES = [
+
+    (
+        "Circle",
+        BENCHMARKS["circle"],
+        "Circle"
+    ),
+
+    (
+        "Ellipse",
+        BENCHMARKS["ellipse"],
+        "Ellipse"
+    ),
+
+    (
+        "Rotated Ellipse",
+        BENCHMARKS["rotated_ellipse"],
+        "Ellipse"
+    ),
+
+    (
+        "Hyperbola",
+        BENCHMARKS["hyperbola"],
+        "Hyperbola"
+    ),
+
+    (
+        "Rotated Hyperbola",
+        BENCHMARKS["rotated_hyperbola"],
+        "Hyperbola"
+    ),
+
+    (
+        "Parabola",
+        BENCHMARKS["parabola"],
+        "Parabola"
+    ),
+
+    (
+        "Pair of Lines",
+        BENCHMARKS["pair_of_lines"],
+        "Pair of Lines"
+    ),
+
+    (
+        "Point",
+        BENCHMARKS["point"],
+        "Point"
+    ),
+
+    (
+        "Empty Conic",
+        BENCHMARKS["empty"],
+        "Empty"
+    )
+]
+
+
+# ------------------------------------------------
+# Run all tests
+# ------------------------------------------------
+
+test_results = []
+
+for test_name, config, expected_type in TEST_CASES:
+
+    result_row = run_single_test(
+        test_name,
+        config,
+        expected_type
+    )
+
+    test_results.append(
+        result_row
+    )
+
+
+# ------------------------------------------------
+# Create result table
+# ------------------------------------------------
+
+test_table = pd.DataFrame(
+    test_results
+)
+
+display(test_table)
